@@ -1,31 +1,26 @@
 import numpy as np
 from matplotlib import pyplot as plt
+from utils.colorline import colorline
 
-
-def simulate(f, initial, dt=0.01, max_time=5, plot=True, title=''):
+def simulate(f, initial, dt=0.01, from_time=0, to_time=5, plot=True, title=''):
     '''
     Löser en 2:a ordningens differentialekvation med Euler-cromer metoden 
     och plottar resultatet.
 
     f: f(y, y', t) = y''
-    initial: [y0, v0]
+    initial: [y_0, y'_0]
     '''
-
-    mode = '2D' if type(initial[0]) in (list, np.array) else '1D' # ifall rörelsen är tvådimensionell
     y, y_prime = map(np.array, initial.copy())
-    ys, y_primes, y_2primes = [],[],[]
-    n = int(max_time/dt) # antal iterationer
-    time = np.arange(0, max_time, dt)
-    t = 0
+    ys, y_primes, y_2primes = [y],[y_prime],[f(y, y_prime, from_time)]
+    time = np.arange(from_time, to_time, dt)
     # euler-cromer
-    for _ in range(n):
+    for t in time[1:]:
         y_2prime = f(y, y_prime, t)
         y_prime = y_prime + y_2prime*dt
         y = y + y_prime*dt
-        t = t + dt
-        # spara de nya värdena
         ys.append(y); y_primes.append(y_prime); y_2primes.append(y_2prime)
 
+    mode = '2D' if type(initial[0]) in (list, np.array) else '1D' # ifall rörelsen är tvådimensionell
     if plot:
         plt.style.use('seaborn-darkgrid')
         fig = plt.figure(constrained_layout=True, figsize=(6, 6))
@@ -65,7 +60,7 @@ def simulate(f, initial, dt=0.01, max_time=5, plot=True, title=''):
             plots['pv'].set_title("y(y')")
             plots['pv'].set_xlabel('y(t)')
             plots['pv'].set_ylabel("y'(t)")
-            plots['pv'].plot(ys, y_primes)
+            colorline(x=ys, y=y_primes, z=time, ax=plots['pv'], norm=None, cmap='copper')
             plots['pv'].scatter(ys[0], y_primes[0], color='r', alpha=0.5)
 
             plots['a'].plot(time, a_speed)
@@ -85,8 +80,9 @@ def simulate(f, initial, dt=0.01, max_time=5, plot=True, title=''):
         plt.show()
 
     return {
-        'y': np.array(ys),
-        'v': np.array(y_primes),
-        'a': np.array(y_2primes),
+        'x': np.array(ys)[:, 0] if mode == '2D' else None,
+        'y': np.array(ys)[:, 1] if mode == '2D' else np.array(ys),
+        'y_prime': np.array(y_primes),
+        'y_2prime': np.array(y_2primes),
         't': np.array(time)
     }

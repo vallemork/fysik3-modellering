@@ -7,7 +7,7 @@ human = {'m': 70, 'C_d': 1.2, 'A': np.pi*0.35**2}
 ball = {'m': 0.5, 'C_d': 0.47, 'A': np.pi*0.1**2}
 bullet = {'m': 0.02, 'C_d': 0.295, 'A': np.pi*0.01**2}
 
-thing = human
+thing = bullet
 
 # Konstanter
 m = thing['m'] # massa
@@ -19,9 +19,9 @@ k_d = 0.5 * C_d * rho * A
 
 # Begynnelsevilkor
 alpha = np.radians(35)
-speed = 0
+speed = 40
 v0 = [speed*np.cos(alpha), speed*np.sin(alpha)]
-y0 = [0, 500]
+y0 = [2, 0]
 initial = [y0, v0]
 
 dt, max_time = 0.01, 15
@@ -35,7 +35,8 @@ def f_drag(y, v, t):
 def f_no_drag(y, v, t):
     return np.array([0, -g])
 
-simulate(f_drag, initial, dt, max_time, title='Människa, 500m fall')
+# simulate(f_drag, initial, dt, max_time, title='Människa, 500m fall')
+
 # simulate(f_no_drag, initial, dt, max_time, title='Pistolkula, inget luftmotstånd')
 
 # def freefall_solution(t):
@@ -47,7 +48,15 @@ simulate(f_drag, initial, dt, max_time, title='Människa, 500m fall')
 
 # res = simulate(f_drag, initial, dt, max_time, plot=False)
 # y_true = freefall_solution(res['t'])
-# plt.plot(res['t'], res['y'][:, 1], label='model')
+# plt.plot(res['t'], res['y'], label='model')
 # plt.plot(res['t'], y_true, label="solution")
 # plt.legend()
 # plt.show()
+
+for dt in [5, 1, 0.1, 0.01, 0.001]:
+    res = simulate(f_no_drag, initial, dt, to_time=10, plot=False)
+    print(res['t'][0], res['t'][-1])
+    plt.plot(res['x'], res['y'], label=f'dt={dt}')
+plt.title('y(x) för olika dt, utan luftmotstånd')
+plt.legend()
+plt.show()
