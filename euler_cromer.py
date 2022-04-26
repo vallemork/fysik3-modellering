@@ -21,17 +21,17 @@ def simulate(f, initial, dt=0.01, from_time=0, to_time=5, plot=True, title=''):
         ys.append(y); y_primes.append(y_prime); y_2primes.append(y_2prime)
 
     mode = '2D' if type(initial[0]) in (list, np.array) else '1D' # ifall rörelsen är tvådimensionell
+    speed = np.linalg.norm(y_primes, axis=1) if mode == '2D' else np.array(y_primes)
+    a_speed = np.linalg.norm(y_2primes, axis=1) if mode == '2D' else np.array(y_2primes)
+
     if plot:
         plt.style.use('seaborn-darkgrid')
         fig = plt.figure(constrained_layout=True, figsize=(6, 6))
         fig.suptitle(title)
         if mode == '2D':
             plots = fig.subplot_mosaic([['pt', 'p'], ['v', 'a']])
-            speed = np.linalg.norm(y_primes, axis=1)
-            a_speed = np.linalg.norm(y_2primes, axis=1)
         else: 
             plots = fig.subplot_mosaic([['pt', 'pv'], ['v', 'a']])
-            speed, a_speed = y_primes, y_2primes
         
         plots['a'].set_title("y''(t) (acceleration)")
         plots['a'].set_xlabel("tid [s]")
@@ -69,7 +69,6 @@ def simulate(f, initial, dt=0.01, from_time=0, to_time=5, plot=True, title=''):
         
         # extra info
         py = np.array(ys)[:,1] if mode == '2D' else np.array(ys)
-        speed = np.array(speed)
         print(title)
         print(f'maxhöjd: {np.max(py):.3f}m efter {time[np.argmax(py)]:.3f}s')
         if len(py[py<0]):
@@ -84,5 +83,6 @@ def simulate(f, initial, dt=0.01, from_time=0, to_time=5, plot=True, title=''):
         'y': np.array(ys)[:, 1] if mode == '2D' else np.array(ys),
         'y_prime': np.array(y_primes),
         'y_2prime': np.array(y_2primes),
-        't': np.array(time)
+        'speed': speed, 
+        't': np.array(time),
     }
